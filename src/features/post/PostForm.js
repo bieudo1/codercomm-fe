@@ -49,8 +49,7 @@ function PostForm() {
     [setValue]
   );
   const onSubmit = (data) => {
-    console.log(data)
-    // dispatch(createPost(data)).then(() => reset());
+    dispatch(createPost(data)).then(() => reset());
   };
 
   return (
