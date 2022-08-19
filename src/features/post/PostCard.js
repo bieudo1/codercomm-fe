@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import {
   Box,
   Link,
@@ -7,17 +7,23 @@ import {
   Avatar,
   Typography,
   CardHeader,
-  IconButton,
+  // IconButton,
+  // Menu,
+  // MenuItem,
+  
+  Button,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { fDate } from "../../utils/formatTime";
+import useAuth from "../../hooks/useAuth";
 
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+// import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PostReaction from "./PostReaction";
 import CommentForm from "../comment/CommentForm";
 import CommentList from "../comment/CommentList";
 
-function PostCard({ post }) {
+function PostCard({ post,handleOpenRepair,handleOpenEdit }) {
+  const { user } = useAuth();
   return (
     <Card>
       <CardHeader
@@ -45,10 +51,22 @@ function PostCard({ post }) {
           </Typography>
         }
         action={
-          <IconButton>
-            <MoreVertIcon sx={{ fontSize: 30 }} />
-          </IconButton>
+          <>
+          {user._id === post?.author?._id &&
+          <Box>
+            <Button onClick={() => handleOpenRepair(post._id) }>xóa</Button>
+            <Button onClick={() => handleOpenEdit(post._id)}>sữa</Button>
+            
+          </Box>
         }
+          </>
+          // <Menu>
+          // <IconButton>
+          // <MoreVertIcon sx={{ fontSize: 30 }} />
+          // </IconButton>
+          // </Menu>
+        }
+        
       />
 
       <Stack spacing={2} sx={{ p: 3 }}>

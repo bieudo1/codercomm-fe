@@ -21,7 +21,7 @@ const slice = createSlice({
     },
 
     hasError(state, action) {
-      state.isLoading = false;
+      state.isLoading= false;
       state.error = action.payload;
     },
 
@@ -58,6 +58,22 @@ const slice = createSlice({
       state.error = null;
       const { postId, reactions } = action.payload;
       state.postsById[postId].reactions = reactions;
+    
+    },
+    removePostSuccess(state,action){
+      state.isLoading = false;
+      state.error = null;
+      const {id} = action.payload;
+      state.postsById[id]= undefined;
+      state.currentPagePosts=state.currentPagePosts.filter( post => post !== id);
+    },
+    removeEditSuccess(state,action){
+      state.isLoading = false;
+      state.error = null;
+
+      const {postId, editPost} = action.payload;
+      state.postsById[postId].content= editPost.content;
+      state.postsById[postId].image= editPost.image;
     },
   },
 });
@@ -81,6 +97,18 @@ export const getPosts =
     }
   };
 
+  export const RepairPost = ({id}) => async (dispatch) => {
+    dispatch(slice.actions.startLoading());
+    try{
+      await apiService.delete(`/posts/${id}`)
+      dispatch(slice.actions.removePostSuccess({id}))
+      dispatch(getCurrentUserProfile());
+    }catch (error) {
+      dispatch(slice.actions.hasError(error.message));
+      toast.error(error.message);
+    }
+  }
+
 export const createPost =
   ({ content, image }) =>
   async (dispatch) => {
@@ -95,6 +123,29 @@ export const createPost =
       dispatch(slice.actions.createPostSuccess(response.data));
       toast.success("Post successfully");
       dispatch(getCurrentUserProfile());
+    } catch (error) {
+      dispatch(slice.actions.hasError(error.message));
+      toast.error(error.message);
+    }
+  };
+
+  export const editPost =
+  ({ content, image,postId }) =>
+  async (dispatch) => {
+    dispatch(slice.actions.startLoading());
+    try {
+      // upload image to cloudinary
+      const imageUrl = await cloudinaryUpload(image);
+      const response= await apiService.put(`/posts/${postId}`, {
+        content,
+        image: imageUrl,
+      });
+      console.log(response);
+      dispatch(slice.actions.removeEditSuccess({
+        postId,
+        editPost: response.data,
+      }));
+      toast.success("Post successfully");
     } catch (error) {
       dispatch(slice.actions.hasError(error.message));
       toast.error(error.message);

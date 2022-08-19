@@ -6,21 +6,24 @@ import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { createPost } from "./postSlice";
+import { editPost } from "./postSlice";
 import { LoadingButton } from "@mui/lab";
+
+
 
 const yupSchema = Yup.object().shape({
   content: Yup.string().required("Content is required"),
 });
 
-const defaultValues = {
-  content: "",
-  image: null,
-};
 
-function PostForm() {
-  const { isLoading } = useSelector((state) => state.post);
+function PostEditForm({postId, handleCloseEdit}) {
+  const { isLoading,postsById } = useSelector((state) => state.post);
 
+  const defaultValues = {
+    content: postsById[postId].content,
+    image:postsById[postId].image,
+    postId:postId,
+  };
   const methods = useForm({
     resolver: yupResolver(yupSchema),
     defaultValues,
@@ -32,7 +35,7 @@ function PostForm() {
     formState: { isSubmitting },
   } = methods;
   const dispatch = useDispatch();
-
+ 
   const handleDrop = useCallback(
     (acceptedFiles) => {
       const file = acceptedFiles[0];
@@ -44,15 +47,14 @@ function PostForm() {
             preview: URL.createObjectURL(file),
           })
         );
-      }
+    }
     },
     [setValue]
   );
-  const onSubmit = (data) => {
-    console.log(data)
-    // dispatch(createPost(data)).then(() => reset());
+const onSubmit = (data) => {
+  handleCloseEdit()
+    dispatch(editPost(data)).then(() => reset());
   };
-
   return (
     <Card sx={{ p: 3 }}>
       <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -62,7 +64,6 @@ function PostForm() {
             multiline
             fullWidth
             rows={4}
-            placeholder="Share what you are thinking here..."
             sx={{
               "& fieldset": {
                 borderWidth: `1px !important`,
@@ -90,8 +91,18 @@ function PostForm() {
               variant="contained"
               size="small"
               loading={isSubmitting || isLoading}
+              
             >
-              Post
+              YES
+            </LoadingButton>
+            <LoadingButton
+              loading={isSubmitting || isLoading}
+              type="submit"
+              variant="contained"
+              size="small"
+              onClick={() =>handleCloseEdit()}
+            >
+              NO
             </LoadingButton>
           </Box>
         </Stack>
@@ -100,4 +111,4 @@ function PostForm() {
   );
 }
 
-export default PostForm;
+export default PostEditForm;

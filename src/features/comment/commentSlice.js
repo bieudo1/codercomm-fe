@@ -29,6 +29,8 @@ const slice = createSlice({
       state.isLoading = false;
       state.error = "";
       const { postId, comments, count, page } = action.payload;
+      state.totalCommentsByPost[postId] = count;
+      state.currentPageByPost[postId] = page;
 
       comments.forEach(
         (comment) => (state.commentsById[comment._id] = comment)
@@ -36,8 +38,11 @@ const slice = createSlice({
       state.commentsByPost[postId] = comments
         .map((comment) => comment._id)
         .reverse();
-      state.totalCommentsByPost[postId] = count;
-      state.currentPageByPost[postId] = page;
+      
+    },
+    removeCommentSuccess(state, action){
+      state.isLoading = false;
+      state.error = null; 
     },
 
     createCommentSuccess(state, action) {
@@ -50,6 +55,17 @@ const slice = createSlice({
       state.error = null;
       const { commentId, reactions } = action.payload;
       state.commentsById[commentId].reactions = reactions;
+    },
+    RepairComment(state, action){
+      state.isLoading = false;
+      state.error = null;
+      const { commentId } = action.payload;
+      state.commentsById[commentId] = undefined;
+
+    },
+    editCommentSuccess(state,action){
+      state.isLoading = false;
+      state.error = null;
     },
   },
 });
@@ -82,7 +98,7 @@ export const getComments =
   };
 
 export const createComment =
-  ({ postId, content }) =>
+  ({ postId, content,UserId }) =>
   async (dispatch) => {
     dispatch(slice.actions.startLoading());
     try {
@@ -90,7 +106,7 @@ export const createComment =
         content,
         postId,
       });
-      dispatch(slice.actions.createCommentSuccess(response.data));
+      dispatch(slice.actions.createCommentSuccess(response.data,UserId));
       dispatch(getComments({ postId }));
     } catch (error) {
       dispatch(slice.actions.hasError(error.message));
@@ -118,4 +134,28 @@ export const sendCommentReaction =
       dispatch(slice.actions.hasError(error.message));
       toast.error(error.message);
     }
+  };
+
+  export const RepairComment = ({postId,commentId}) => async (dispatch) => {
+    dispatch(slice.actions.startLoading());
+    try{
+      await apiService.delete(`/comments/${commentId}`)
+      dispatch(getComments({ postId }));
+      dispatch(slice.actions.removeCommentSuccess({commentId,postId}))
+    }catch (error) {
+      dispatch(slice.actions.hasError(error.message));
+      toast.error(error.message);
+    }
+};
+
+export const EditComment = ({postId,commentId,content}) => async (dispatch) => {
+  dispatch(slice.actions.startLoading());
+  try{
+    await apiService.put(`/comments/${commentId}`,{content})
+    dispatch(getComments({ postId }));
+    dispatch(slice.actions.editCommentSuccess({commentId,postId}))
+  }catch (error) {
+    dispatch(slice.actions.hasError(error.message));
+    toast.error(error.message);
+  }
   };

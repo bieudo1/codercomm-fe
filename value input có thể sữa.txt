@@ -1,0 +1,7 @@
+<input 
+            type="text" 
+            placeholder="m" 
+            value={searchInput1} 
+            onChange={(e) => setSearchInput1(e.target.value)}
+            // onChange={setSearchInput1(searchInput)}
+        />

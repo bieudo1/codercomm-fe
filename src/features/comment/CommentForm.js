@@ -7,10 +7,11 @@ import useAuth from "../../hooks/useAuth";
 import { useDispatch } from "react-redux";
 import { createComment } from "./commentSlice";
 
-function CommentForm({ postId }) {
+function CommentForm({ postId,endit }) {
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const dispatch = useDispatch();
+
 
   const handleSubmit = (e) => {
     e.preventDefault();

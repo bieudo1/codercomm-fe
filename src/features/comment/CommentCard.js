@@ -1,9 +1,13 @@
 import React from "react";
-import { Avatar, Box, Paper, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Paper, Stack, Typography, Button } from "@mui/material";
 import { fDate } from "../../utils/formatTime";
 import CommentReaction from "./CommentReaction";
+import useAuth from "../../hooks/useAuth";
 
-function CommentCard({ comment }) {
+function CommentCard({ comment,handleOpenRepair, handleOpenEdit }) {
+  const { user } = useAuth();
+
+
   return (
     <Stack direction="row" spacing={2}>
       <Avatar alt={comment.author?.name} src={comment.author?.avatarUrl} />
@@ -24,6 +28,11 @@ function CommentCard({ comment }) {
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {comment.content}
         </Typography>
+        {user._id === comment.author?._id &&
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={() =>handleOpenRepair(comment._id)}>xóa</Button>
+          <Button onClick={() =>handleOpenEdit(comment._id,comment.content)}>sữa</Button>
+        </Box>}
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <CommentReaction comment={comment} />
         </Box>
